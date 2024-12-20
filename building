@@ -1,0 +1,54 @@
+#include <Arduino.h>
+#include <ESP32Servo.h>
+
+Servo myservo; 
+
+#define Cds_PIN 35
+#define Servo_PIN 14
+#define Wind_PIN 34
+#define Solar_PIN 36
+#define LED_PIN 4
+
+int pos = 0;
+int solarThreshold = 3000;  
+int windThreshold = 1000;  
+
+void setup() {
+  Serial.begin(115200);    // 시리얼 모니터 시작
+  myservo.attach(Servo_PIN, 500, 2400); 
+
+  pinMode(Cds_PIN, INPUT); 
+  pinMode(Wind_PIN, INPUT); 
+  pinMode(Solar_PIN, INPUT); 
+  pinMode(LED_PIN, OUTPUT); 
+}
+
+void loop() {
+  int CdsValue = analogRead(Cds_PIN);
+  int WindValue = analogRead(Wind_PIN);
+  Serial.print("조도 센서 값: ");
+  Serial.print(CdsValue);
+
+  if (CdsValue < 100 ) {
+    pos = 90;
+  } else {
+    pos = 0;
+  }
+  myservo.write(pos);
+
+  int solarValue = analogRead(Solar_PIN);
+  Serial.print(" | 태양광 센서 값: ");
+  Serial.print(solarValue);
+
+  int windValue = analogRead(Wind_PIN);
+  Serial.print(" | 풍력 센서 값: ");
+  Serial.println(windValue);
+
+  if (solarValue > solarThreshold || windValue > windThreshold) {
+    digitalWrite(LED_PIN, HIGH);  // LED 켜기
+  } else {
+    digitalWrite(LED_PIN, LOW);   // LED 끄기
+  }
+
+  delay(1000);
+}
